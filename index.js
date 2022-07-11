@@ -4,7 +4,7 @@ import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 
 const app = express()
-const port = 4000;
+const port = process.env.PORT;
 const movies =[
 
     {
