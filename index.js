@@ -78,7 +78,7 @@ const movies =[
     //middleware(inbuilt) - for using body to json().
 
     app.use(express.json());
-const MONGO_URL = process.env.MONGO_URL;
+const MONGO_URL = process.env.MONGO_URL;  
    // const MONGO_URL = "mongodb://127.0.0.1"; 
 
     async function createConnection() {
@@ -93,7 +93,12 @@ const MONGO_URL = process.env.MONGO_URL;
         res.send("hello world")
       })
 app.get('/movies', async function (req, res) {
-  const movies = await client.db("movies").collection("movies").find({}).toArray(); //toArray - to convert pagination to array
+
+  if(req.query.rating){
+    req.query.rating = +req.query.rating;
+  }
+  
+  const movies = await client.db("movies").collection("movies").find(req.query).toArray(); //toArray - to convert pagination to array
   res.send(movies)
 })
 app.get("/movies/:id",async  function (request, response) {
@@ -111,6 +116,23 @@ const movie = await client.db("movies").collection("movies").findOne({id:id}) //
     console.log(data);
     const result = await client.db("movies").collection("movies").insertMany(data);
     response.send(result);
+  })
+//delete API
+  app.delete("/movies/:id", async function(request,response) {
+    const {id} = request.params;
+    //db operation => db.deleteOne({id});
+
+    const delmovie =  await client.db("movies").collection("movies").deleteOne({id:id});
+    delmovie.deletedCount > 0 ? response.send(delmovie) : response.status(404).send({msg:"movie not found"})
+  })
+
+  //Update API
+
+  app.put("/movies/:id", async function(request,response){
+    const {id} = request.params;
+    const data = request.body;
+    const edited = await client.db("movies").collection("movies").updateOne({id:id},{$set:data});
+   response.send(edited) 
   })
 
 app.listen(port)
