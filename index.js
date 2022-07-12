@@ -3,7 +3,7 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import { moviesRouter } from "./router/movie.js";
-
+import cors from 'cors';
 const app = express()
 const port = process.env.PORT;
 const movies =[
@@ -77,8 +77,9 @@ const movies =[
     dotenv.config();
 
     //middleware(inbuilt) - for using body to json().
-
     app.use(express.json());
+    //cors
+    app.use(cors());
 const MONGO_URL = process.env.MONGO_URL;  
    // const MONGO_URL = "mongodb://127.0.0.1"; 
 
