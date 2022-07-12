@@ -2,6 +2,7 @@
 import express from "express";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
+import { moviesRouter } from "./router/movie.js";
 
 const app = express()
 const port = process.env.PORT;
@@ -88,51 +89,13 @@ const MONGO_URL = process.env.MONGO_URL;
       return client;
     }
     
-    const client = await createConnection(); //top-level await
-    app.get('/', function (req, res) {
-        res.send("hello world")
-      })
-app.get('/movies', async function (req, res) {
-
-  if(req.query.rating){
-    req.query.rating = +req.query.rating;
-  }
+    export const client = await createConnection(); //top-level await
   
-  const movies = await client.db("movies").collection("movies").find(req.query).toArray(); //toArray - to convert pagination to array
-  res.send(movies)
+    
+app.get('/', function (req, res) {
+  res.send("hello world")
 })
-app.get("/movies/:id",async  function (request, response) {
-const {id} = request.params;
-//db operation -> db.movies.findone({id})
-//console.log(request.params,id);
-//const movie = movies.find((mv)=>mv.id===id)
 
-const movie = await client.db("movies").collection("movies").findOne({id:id}) // connecting from mongoDB
-   movie ? response.send(movie) : response.status(404).send({msg:"movie not found"})
-  })
-
-  app.post("/movies",async function(request,response) {
-    const data = request.body;
-    console.log(data);
-    const result = await client.db("movies").collection("movies").insertMany(data);
-    response.send(result);
-  })
-//delete API
-  app.delete("/movies/:id", async function(request,response) {
-    const {id} = request.params;
-    //db operation => db.deleteOne({id});
-
-    const delmovie =  await client.db("movies").collection("movies").deleteOne({id:id});
-    delmovie.deletedCount > 0 ? response.send(delmovie) : response.status(404).send({msg:"movie not found"})
-  })
-
-  //Update API
-
-  app.put("/movies/:id", async function(request,response){
-    const {id} = request.params;
-    const data = request.body;
-    const edited = await client.db("movies").collection("movies").updateOne({id:id},{$set:data});
-   response.send(edited) 
-  })
+app.use("/movies",moviesRouter);
 
 app.listen(port)
